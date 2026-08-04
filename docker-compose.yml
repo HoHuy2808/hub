@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: bookstore
+      POSTGRES_DB: hub
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
