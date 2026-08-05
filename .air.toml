@@ -1,0 +1,68 @@
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  # Lệnh build chính xác trỏ tới file main.go của dự án
+  cmd = "go build -o ./tmp/main ./cmd/server/main.go"
+  
+  # Lệnh chạy file sau khi build
+  bin = "./tmp/main"
+  
+  # Lệnh chạy custom (nếu cần truyền thêm argument)
+  full_bin = ""
+  
+  # Các đuôi file sẽ được theo dõi để reload
+  include_ext = ["go", "tpl", "tmpl", "html", "env"]
+  
+  # Bỏ qua các thư mục không cần thiết
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  
+  # Bỏ qua các file cụ thể
+  exclude_file = []
+  
+  # Theo dõi các file cụ thể
+  include_dir = []
+  
+  # Bỏ qua các regex
+  exclude_regex = ["_test.go"]
+  
+  # Bỏ qua khi file không thay đổi
+  exclude_unchanged = false
+  
+  # Đi theo symlink
+  follow_symlink = false
+  
+  # File log của quá trình build
+  log = "build-errors.log"
+  
+  # Độ trễ khi build (ms)
+  delay = 1000
+  
+  # Dừng chạy ngay khi có lỗi build
+  stop_on_error = true
+  
+  # Gửi tín hiệu ngắt thay vì kill process thẳng tay
+  send_interrupt = false
+  
+  # Thời gian chờ sau khi gửi tín hiệu ngắt (ms)
+  kill_delay = 500
+  
+  # Thêm tham số khi build (nếu cần)
+  args_bin = []
+
+[color]
+  # Cấu hình màu cho log
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[log]
+  # Hiển thị thời gian trong log
+  time = false
+
+[misc]
+  # Xóa thư mục tmp khi thoát air
+  clean_on_exit = true
