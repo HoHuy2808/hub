@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
-	"hub/database"
+	"hub/internal/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -23,7 +24,7 @@ import (
 func main() {
 	// Load biến môi trường từ file .env
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("⚠️ Không tìm thấy file .env, sẽ sử dụng biến môi trường hệ thống")
+		fmt.Println("⚠️ Không tìm thấy file .env")
 	}
 
 	// Kiểm tra kết nối database
@@ -37,22 +38,26 @@ func main() {
 	// Khởi tạo router mặc định của Gin
 	r := gin.Default()
 
-	// Khai báo đường dẫn GET /ping
-	// @Summary      Kiểm tra API
-	// @Description  Trả về một thông báo pong để xác nhận server đang chạy
-	// @Tags         Health
-	// @Produce      json
-	// @Success      200  {object}  map[string]string
-	// @Router       /ping [get]
-	r.GET("/ping", func(c *gin.Context) {
+	// API Health Check
+	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
+			"success":   true,
+			"message":   "Backend server is running healthy 🚀",
+			"timestamp": time.Now().Unix(),
 		})
 	})
 
 	// Cấu hình Swagger endpoint
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Routers
+	// v1 := r.Group("/api/v1")
+	// v1.GET("/ping", func(c *gin.Context) {
+	// 	c.JSON(http.StatusOK, gin.H{
+	// 		"message": "pong",
+	// 	})
+	// })
+
 	// Chạy server ở cổng 8080 (mặc định)
-	r.Run(":8080")
+	r.Run(":2808")
 }
