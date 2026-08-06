@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Comment struct {
@@ -15,5 +14,5 @@ type Comment struct {
 	Content   string    `gorm:"type:text;not null;"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
-	DeletedAt gorm.DeletedAt
+	DeletedAt *time.Time
 }

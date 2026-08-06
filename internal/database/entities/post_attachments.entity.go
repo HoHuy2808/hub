@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type PostAttachment struct {
@@ -13,5 +12,5 @@ type PostAttachment struct {
 	MediaUrl  *string   `gorm:"type:string"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
-	DeletedAt gorm.DeletedAt
+	DeletedAt *time.Time
 }
