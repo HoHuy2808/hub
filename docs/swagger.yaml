@@ -1,9 +1,57 @@
 basePath: /
-host: localhost:8080
+definitions:
+  auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      user_name:
+        type: string
+    required:
+    - email
+    - password
+    - user_name
+    type: object
+  auth.RegisterResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+      user_name:
+        type: string
+    type: object
+host: localhost:2808
 info:
   contact: {}
   description: Đây là API cho dự án Backend Hub.
   title: Hub API
   version: "1.0"
-paths: {}
+paths:
+  /auth/register:
+    post:
+      description: Register a new user
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.RegisterResponse'
+      summary: Register User
+      tags:
+      - Auth
 swagger: "2.0"
