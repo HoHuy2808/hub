@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"hub/internal/database"
+	"hub/internal/modules/auth"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,7 +20,7 @@ import (
 // @title           Hub API
 // @version         1.0
 // @description     Đây là API cho dự án Backend Hub.
-// @host            localhost:8080
+// @host            localhost:2808
 // @BasePath        /
 func main() {
 	// Load biến môi trường từ file .env
@@ -51,13 +52,8 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Routers
-	// v1 := r.Group("/api/v1")
-	// v1.GET("/ping", func(c *gin.Context) {
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
+	auth.AuthRouter(r, database.DB)
 
-	// Chạy server ở cổng 8080 (mặc định)
+	// Chạy server ở cổng 2808
 	r.Run(":2808")
 }
