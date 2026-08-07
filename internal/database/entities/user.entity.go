@@ -22,4 +22,10 @@ type User struct {
 	Posts        []Post         `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
 	Reaction     []Reaction     `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
 	Comments     []Comment      `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
+
+	SentRequest     []Request `gorm:"foreignKey:SenderId;references:Id;constraint:OnDelete:CASCADE;"`
+	ReceivedRequest []Request `gorm:"foreignKey:ReceiverId;references:Id;constraint:OnDelete:CASCADE;"`
+
+	Contacts        []Contact `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
+	ContactsOfUsers []Contact `gorm:"foreignKey:ContactId;references:Id;constraint:OnDelete:CASCADE;"`
 }
