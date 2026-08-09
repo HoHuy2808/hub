@@ -13,6 +13,7 @@ type RefreshToken struct {
 
 	RefreshToken string `gorm:"type:text;not null;"`
 
+	ExpiresAt time.Time `gorm:"type:timestamp;not null;"`
 	CreatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;not null;"`
 	UpdatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;not null;"`
 }
