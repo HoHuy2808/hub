@@ -1,5 +1,24 @@
 basePath: /
 definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   auth.RegisterRequest:
     properties:
       email:
@@ -34,6 +53,26 @@ info:
   title: Hub API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      description: Login to the application
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+      summary: Login
+      tags:
+      - Auth
   /auth/register:
     post:
       description: Register a new user
@@ -54,4 +93,9 @@ paths:
       summary: Register User
       tags:
       - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
