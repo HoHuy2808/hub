@@ -17,11 +17,14 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title           Hub API
-// @version         1.0
-// @description     Đây là API cho dự án Backend Hub.
-// @host            localhost:2808
-// @BasePath        /
+// @title           			Hub API
+// @version         			1.0
+// @description     			Đây là API cho dự án Backend Hub.
+// @host            			localhost:2808
+// @BasePath        			/
+// @securityDefinitions.apikey 	BearerAuth
+// @in 							header
+// @name 						Authorization
 func main() {
 	// Load biến môi trường từ file .env
 	if err := godotenv.Load(); err != nil {
