@@ -14,6 +14,7 @@ type User struct {
 	Password  string    `gorm:"type:varchar(255);not null;"`
 	IsActive  bool      `gorm:"type:boolean;default:true;"`
 	IsBlock   bool      `gorm:"type:boolean;default:false;"`
+	Role      string    `gorm:"type:varchar(255);not null;default:'USER';"`
 	CreatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;not null;"`
 	UpdatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;not null;"`
 
