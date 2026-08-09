@@ -3,12 +3,17 @@ package auth
 import (
 	"errors"
 	"hub/internal/database/entities"
+	"hub/pkg/authenticate"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"gorm.io/gorm"
 )
 
 type UserService interface {
 	Register(req *RegisterRequest) (*RegisterResponse, error)
+	Login(req *LoginRequest) (*LoginResponse, error)
 }
 
 type UserServiceImp struct {
@@ -36,19 +41,75 @@ func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, erro
 		return nil, errors.New("Phone already exists")
 	}
 
+	usernameUser, err := u.userRepo.FindUserName(req.UserName)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if usernameUser != nil {
+		return nil, errors.New("Username already exists")
+	}
+
+	cost := bcrypt.DefaultCost
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), cost)
+	if err != nil {
+		return nil, err
+	}
 	user := &entities.User{
 		UserName: req.UserName,
 		Email:    req.Email,
 		Phone:    req.Phone,
-		Password: req.Password,
+		Password: string(passwordHash),
 	}
-
-	u.userRepo.CreateUser(user)
-
+	if u.userRepo.CheckEmptyDB() == true {
+		user.Role = "ADMIN"
+	}
+	err = u.userRepo.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
 	return &RegisterResponse{
 		ID:       user.Id,
 		UserName: user.UserName,
 		Email:    user.Email,
 		Phone:    user.Phone,
+	}, nil
+}
+
+func (u *UserServiceImp) Login(req *LoginRequest) (*LoginResponse, error) {
+	user, err := u.userRepo.FindUserByEmail(req.Email)
+	if err != nil {
+		return nil, errors.New("Incorrect email or password")
+	}
+
+	isMatch := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if isMatch != nil {
+		return nil, errors.New("Incorrect email or password")
+	}
+
+	AccessToken, err := authenticate.GenerateAccessToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	RefreshToken, err := authenticate.GenerateRefreshToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshTokenEntity := &entities.RefreshToken{
+		RefreshToken: RefreshToken,
+		UserId:       user.Id,
+		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),
+	}
+
+	err = u.userRepo.CreateRefreshToken(refreshTokenEntity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		ID:           user.Id,
+		AccessToken:  AccessToken,
+		RefreshToken: RefreshToken,
 	}, nil
 }

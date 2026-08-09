@@ -36,10 +36,49 @@ func (u *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	result, _ := u.userService.Register(&registerInput)
-
+	result, err := u.userService.Register(&registerInput)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"error":  err.Error(),
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"data":   result,
+		"data": result,
+	})
+}
+
+// Login 		godoc
+// @Summary		Login
+// @Description	Login to the application
+// @Tags		Auth
+// @Produce		json
+// @Param		user body LoginRequest true "User object"
+// @Success		200 {object} LoginResponse
+// @Router		/auth/login [post]
+func (u *UserController) Login(ctx *gin.Context) {
+
+	loginInput := LoginRequest{}
+
+	if err := ctx.ShouldBindJSON(&loginInput); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status":  "failed",
+			"message": "Invalid Input",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	result, err := u.userService.Login(&loginInput)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"error":  err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": result,
 	})
 }
