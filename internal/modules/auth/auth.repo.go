@@ -19,7 +19,7 @@ type UserRepositoryImp struct {
 	db *gorm.DB
 }
 
-func NewUserRepositoryImp(db *gorm.DB) *UserRepositoryImp {
+func NewUserRepositoryImp(db *gorm.DB) UserRepository {
 	return &UserRepositoryImp{db: db}
 }
 
