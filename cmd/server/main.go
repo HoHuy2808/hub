@@ -7,6 +7,7 @@ import (
 
 	"hub/internal/database"
 	"hub/internal/modules/auth"
+	"hub/internal/modules/post"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -56,7 +57,7 @@ func main() {
 
 	// Routers
 	auth.AuthRouter(r, database.DB)
-
+	post.PostRouter(r, database.DB)
 	// Chạy server ở cổng 2808
 	r.Run(":2808")
 }
