@@ -46,6 +46,41 @@ definitions:
       user_name:
         type: string
     type: object
+  post.CreatePostRequest:
+    properties:
+      attachments:
+        items:
+          type: string
+        type: array
+      content:
+        type: string
+      is_public:
+        type: boolean
+    type: object
+  post.CreatePostResponse:
+    properties:
+      attachments:
+        items:
+          type: string
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  post.UpdatePostRequest:
+    properties:
+      content:
+        type: string
+      is_public:
+        type: boolean
+    type: object
 host: localhost:2808
 info:
   contact: {}
@@ -93,6 +128,77 @@ paths:
       summary: Register User
       tags:
       - Auth
+  /posts/:
+    post:
+      description: Create a new post with the given content and attachments
+      parameters:
+      - description: Post content
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/post.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/post.CreatePostResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+      tags:
+      - Post
+  /posts/{id}:
+    delete:
+      description: Delete an existing post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the deleted post data
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an existing post
+      tags:
+      - Post
+    patch:
+      description: Update the content, attachments or privacy of an existing post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Post data to update
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/post.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated post data
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an existing post
+      tags:
+      - Post
 securityDefinitions:
   BearerAuth:
     in: header
