@@ -74,6 +74,12 @@ definitions:
       user_id:
         type: string
     type: object
+  post.PaginatedResponse:
+    properties:
+      data: {}
+      total:
+        type: integer
+    type: object
   post.UpdatePostRequest:
     properties:
       content:
@@ -129,6 +135,41 @@ paths:
       tags:
       - Auth
   /posts/:
+    get:
+      description: Get all posts with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Sort by
+        in: query
+        name: created_at
+        type: string
+      - description: Sort order
+        in: query
+        name: desc
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the list of posts
+          schema:
+            $ref: '#/definitions/post.PaginatedResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all posts
+      tags:
+      - Post
     post:
       description: Create a new post with the given content and attachments
       parameters:
