@@ -15,6 +15,7 @@ func PostRouter(r *gin.Engine, db *gorm.DB) {
 	postRoutes := r.Group("/posts")
 	postRoutes.Use(middleware.AuthMiddleware())
 	{
+		postRoutes.GET("/", postController.GetAll)
 		postRoutes.POST("/", postController.CreatePost)
 		postRoutes.PATCH("/:id", postController.UpdatePost)
 		postRoutes.DELETE("/:id", postController.DeletePost)

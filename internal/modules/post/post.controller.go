@@ -15,6 +15,43 @@ func NewPostController(postService PostService) *PostController {
 	return &PostController{postService: postService}
 }
 
+// GetAll 		godoc
+// @Security	BearerAuth
+// @Summary		Get all posts
+// @Description Get all posts with pagination
+// @Tags        Post
+// @Produce     json
+// @Param       page query int false "Page number"
+// @Param       limit query int false "Number of items per page"
+// @Param       search query string false "Search term"
+// @Param       created_at query string false "Sort by"
+// @Param       desc query string false "Sort order"
+// @Success     200 {object} PaginatedResponse "Returns the list of posts"
+// @Router      /posts/ [get]
+func (p *PostController) GetAll(ctx *gin.Context) {
+	var query QueryParams
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"error":  err.Error(),
+		})
+		return
+	}
+
+	posts, total, err := p.postService.GetAll(query)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status": "failed",
+			"error":  err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"data":  posts,
+		"total": total,
+	})
+}
+
 // CreatePost	godoc
 // @Security	BearerAuth
 // @Summary		Create a new post
