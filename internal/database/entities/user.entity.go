@@ -29,4 +29,7 @@ type User struct {
 
 	Contacts        []Contact `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
 	ContactsOfUsers []Contact `gorm:"foreignKey:ContactId;references:Id;constraint:OnDelete:CASCADE;"`
+
+	SentNoti    []Notification `gorm:"foreignKey:FromUserId;references:Id;constraint:OnDelete:CASCADE;"`
+	ReceiveNoti []Notification `gorm:"foreignKey:ToUserId;references:Id;constraint:OnDelete:CASCADE;"`
 }

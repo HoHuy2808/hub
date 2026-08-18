@@ -26,6 +26,7 @@ func ConnectToPostgreSQL() (*gorm.DB, error) {
 		&entities.Reaction{},
 		&entities.Request{},
 		&entities.Contact{},
+		&entities.Notification{},
 	)
 	if err != nil {
 		panic("Failed to auto migrate: " + err.Error())
