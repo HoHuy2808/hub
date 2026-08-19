@@ -3,6 +3,8 @@ package attachment
 import (
 	"net/http"
 
+	"hub/pkg/response"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -31,19 +33,13 @@ func (a *AttachmentController) GetAll(ctx *gin.Context) {
 
 	postId, err := uuid.Parse(postIdParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var queryParams QueryParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -51,15 +47,12 @@ func (a *AttachmentController) GetAll(ctx *gin.Context) {
 
 	attachments, total, err := a.attachmentService.GetAll(queryParams)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"data":  attachments,
+	response.Success(ctx, http.StatusOK, "Lấy danh sách đính kèm thành công", gin.H{
+		"items": attachments,
 		"total": total,
 	})
 }
@@ -77,28 +70,19 @@ func (a *AttachmentController) GetAll(ctx *gin.Context) {
 func (a *AttachmentController) GetAllByUser(ctx *gin.Context) {
 	userId, exists := ctx.Get("userId")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"status": "failed",
-			"error":  "Unauthorized",
-		})
+		response.Error(ctx, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	UserId, ok := userId.(uuid.UUID)
 	if !ok {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"status": "failed",
-			"error":  "Invalid user ID format in token",
-		})
+		response.Error(ctx, http.StatusInternalServerError, "Invalid user ID format in token")
 		return
 	}
 
 	var queryParams QueryParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -106,15 +90,12 @@ func (a *AttachmentController) GetAllByUser(ctx *gin.Context) {
 
 	attachments, total, err := a.attachmentService.GetAll(queryParams)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"data":  attachments,
+	response.Success(ctx, http.StatusOK, "Lấy danh sách đính kèm của người dùng thành công", gin.H{
+		"items": attachments,
 		"total": total,
 	})
 }
@@ -134,19 +115,13 @@ func (a *AttachmentController) AddAttachment(ctx *gin.Context) {
 
 	postId, err := uuid.Parse(postIdParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var addAttachmentRequest AddAttachmentRequest
 	if err := ctx.ShouldBindJSON(&addAttachmentRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -154,16 +129,11 @@ func (a *AttachmentController) AddAttachment(ctx *gin.Context) {
 
 	result, err := a.attachmentService.AddAttachment(&addAttachmentRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": result,
-	})
+	response.Success(ctx, http.StatusOK, "Thêm đính kèm thành công", result)
 }
 
 // DeleteAttachment godoc
@@ -180,23 +150,15 @@ func (a *AttachmentController) DeleteAttachment(ctx *gin.Context) {
 
 	attachmentId, err := uuid.Parse(attachmentIdParam)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = a.attachmentService.DeleteAttachment(attachmentId)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Delete attachment successfully",
-	})
+	response.Success(ctx, http.StatusOK, "Xóa đính kèm thành công", nil)
 }
