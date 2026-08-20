@@ -1,5 +1,23 @@
 basePath: /
 definitions:
+  attachment.AddAttachmentRequest:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    required:
+    - urls
+    type: object
+  attachment.AddAttachmentResponse:
+    properties:
+      post_id:
+        type: string
+      url:
+        items:
+          type: string
+        type: array
+    type: object
   auth.LoginRequest:
     properties:
       email:
@@ -44,6 +62,47 @@ definitions:
       phone:
         type: string
       user_name:
+        type: string
+    type: object
+  comment.CreateCommentRequest:
+    properties:
+      content:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  comment.CreateCommentResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      meta_data:
+        additionalProperties: true
+        type: object
+      parent_id:
+        type: string
+      post_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  comment.UpdateCommentRequest:
+    properties:
+      content:
+        type: string
+    type: object
+  comment.UpdateCommentResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      post_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
         type: string
     type: object
   post.CreatePostRequest:
@@ -134,6 +193,117 @@ paths:
       summary: Register User
       tags:
       - Auth
+  /comments/{id}:
+    delete:
+      description: Delete an existing comment by ID
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
+      tags:
+      - Comment
+    patch:
+      description: Update the content of an existing comment
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New comment content
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/comment.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.UpdateCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a comment
+      tags:
+      - Comment
+  /comments/{postId}:
+    get:
+      description: Get all comments of a specific post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort by
+        in: query
+        name: sortBy
+        type: string
+      - description: Sort order
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.CreateCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all comments
+      tags:
+      - Comment
+    post:
+      description: Create a new comment on a specific post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Comment content
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.CreateCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new comment
+      tags:
+      - Comment
   /posts/:
     get:
       description: Get all posts with pagination
@@ -240,6 +410,110 @@ paths:
       summary: Update an existing post
       tags:
       - Post
+  /posts/{post_id}/attachments:
+    get:
+      description: Get all attachments
+      parameters:
+      - description: Post ID
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attachment.AddAttachmentResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all attachments
+      tags:
+      - Attachment
+    post:
+      description: Add attachment to a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: Attachment data
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/attachment.AddAttachmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attachment.AddAttachmentResponse'
+      security:
+      - BearerAuth: []
+      summary: Add attachment to a post
+      tags:
+      - Attachment
+  /posts/attachments/{id}:
+    delete:
+      description: Delete attachment
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attachment.AddAttachmentResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete attachment
+      tags:
+      - Attachment
+  /users/me/attachments:
+    get:
+      description: Get all attachments for a specific user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attachment.AddAttachmentResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all attachments by user
+      tags:
+      - Attachment
 securityDefinitions:
   BearerAuth:
     in: header
