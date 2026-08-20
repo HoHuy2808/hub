@@ -71,7 +71,237 @@
                 }
             }
         },
+        "/comments/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an existing comment by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Delete a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the content of an existing comment",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Update a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New comment content",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.UpdateCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.UpdateCommentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{postId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all comments of a specific post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Get all comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort by",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order",
+                        "name": "sortOrder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new comment on a specific post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create a new comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Comment content",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/posts/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all posts with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Get all posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort by",
+                        "name": "created_at",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order",
+                        "name": "desc",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of posts",
+                        "schema": {
+                            "$ref": "#/definitions/post.PaginatedResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -102,6 +332,40 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/post.CreatePostResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/attachments/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete attachment",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Delete attachment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.AddAttachmentResponse"
                         }
                     }
                 }
@@ -183,9 +447,167 @@
                     }
                 }
             }
+        },
+        "/posts/{post_id}/attachments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all attachments",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Get all attachments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.AddAttachmentResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add attachment to a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Add attachment to a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attachment data",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attachment.AddAttachmentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.AddAttachmentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/attachments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all attachments for a specific user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attachment"
+                ],
+                "summary": "Get all attachments by user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.AddAttachmentResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "attachment.AddAttachmentRequest": {
+            "type": "object",
+            "required": [
+                "urls"
+            ],
+            "properties": {
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "attachment.AddAttachmentResponse": {
+            "type": "object",
+            "properties": {
+                "post_id": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "auth.LoginRequest": {
             "type": "object",
             "required": [
@@ -255,6 +677,69 @@
                 }
             }
         },
+        "comment.CreateCommentRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.CreateCommentResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "meta_data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.UpdateCommentRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.UpdateCommentResponse": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "post.CreatePostRequest": {
             "type": "object",
             "properties": {
@@ -295,6 +780,15 @@
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "post.PaginatedResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "total": {
+                    "type": "integer"
                 }
             }
         },

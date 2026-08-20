@@ -15,4 +15,6 @@ type Comment struct {
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;"`
 	DeletedAt *time.Time
+
+	Replies []Comment `gorm:"foreignKey:ParentId;references:Id;constraint:OnDelete:CASCADE;"`
 }

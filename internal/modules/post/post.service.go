@@ -7,6 +7,7 @@ import (
 )
 
 type PostService interface {
+	GetAll(params QueryParams) ([]entities.Post, int64, error)
 	CreatePost(post *CreatePostRequest) (*CreatePostResponse, error)
 	UpdatePost(post *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(postId uuid.UUID, userId uuid.UUID) (bool, error)
@@ -18,6 +19,9 @@ type PostServiceImp struct {
 
 func NewPostServiceImp(postRepo PostRepository) *PostServiceImp {
 	return &PostServiceImp{postRepo: postRepo}
+}
+func (p *PostServiceImp) GetAll(params QueryParams) ([]entities.Post, int64, error) {
+	return p.postRepo.GetAll(params)
 }
 
 func (p *PostServiceImp) CreatePost(post *CreatePostRequest) (*CreatePostResponse, error) {

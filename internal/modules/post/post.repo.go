@@ -8,6 +8,7 @@ import (
 )
 
 type PostRepository interface {
+	GetAll(params QueryParams) ([]entities.Post, int64, error)
 	CreatePost(post *entities.Post) error
 	UpdatePost(post *entities.Post) error
 	FindPostById(postId uuid.UUID) (*entities.Post, error)
@@ -20,6 +21,38 @@ type PostRepositoryImp struct {
 
 func NewPostRepositoryImp(db *gorm.DB) *PostRepositoryImp {
 	return &PostRepositoryImp{db: db}
+}
+
+func (p *PostRepositoryImp) GetAll(params QueryParams) ([]entities.Post, int64, error) {
+	var posts []entities.Post
+	var total int64
+
+	// Tạo câu truy vấn ban đầu
+	query := p.db.Model(&entities.Post{})
+
+	// Filter
+	if params.Search != "" {
+		query = query.Where("content LIKE ?", "%"+params.Search+"%")
+	}
+	// Đếm tổng trước khi phân trang
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Sắp xếp
+	orderBy := params.SortBy + " " + params.SortOrder
+	query = query.Order(orderBy)
+
+	// Phân trang
+	offset := (params.Page - 1) * params.Limit
+	query = query.Limit(params.Limit).Offset(offset)
+
+	// Lấy dữ liệu và map vào biến posts
+	if err := query.Preload("Attachments").Find(&posts).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return posts, total, nil
 }
 
 func (p *PostRepositoryImp) CreatePost(post *entities.Post) error {

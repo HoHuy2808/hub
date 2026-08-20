@@ -4,6 +4,8 @@ import (
 	// "hub/internal/modules/auth/service"
 	"net/http"
 
+	"hub/pkg/response"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,25 +30,16 @@ func (u *UserController) Register(ctx *gin.Context) {
 	registerInput := RegisterRequest{}
 
 	if err := ctx.ShouldBindJSON(&registerInput); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status":  "failed",
-			"message": "Invalid Input",
-			"error":   err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	result, err := u.userService.Register(&registerInput)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": result,
-	})
+	response.Success(ctx, http.StatusOK, "Đăng ký thành công", result)
 }
 
 // Login 		godoc
@@ -62,23 +55,14 @@ func (u *UserController) Login(ctx *gin.Context) {
 	loginInput := LoginRequest{}
 
 	if err := ctx.ShouldBindJSON(&loginInput); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status":  "failed",
-			"message": "Invalid Input",
-			"error":   err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	result, err := u.userService.Login(&loginInput)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status": "failed",
-			"error":  err.Error(),
-		})
+		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": result,
-	})
+	response.Success(ctx, http.StatusOK, "Đăng nhập thành công", result)
 }
