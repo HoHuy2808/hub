@@ -49,11 +49,13 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 	if post == nil {
 		return nil, errors.New("Post not found")
 	}
+
+	// Tạo comment
 	comment := &entities.Comment{
-		PostId:   req.PostId,
-		UserId:   req.UserId,
-		ParentId: req.ParentId,
-		Content:  req.Content,
+		PostId:      req.PostId,
+		CommenterId: req.CommenterId,
+		ParentId:    req.ParentId,
+		Content:     req.Content,
 	}
 
 	err = c.commentRepo.CreateComment(comment)
@@ -61,6 +63,7 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 		return nil, err
 	}
 
+	// Gửi thông báo đến chủ post
 	metaDataMap := make(map[string]interface{})
 	metaDataMap["post_id"] = req.PostId
 	metaDataMap["comment_id"] = comment.Id
@@ -78,18 +81,18 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 		if req.ParentId != nil {
 			parentComment, err := c.commentRepo.FindCommentById(*req.ParentId)
 			if err == nil {
-				targetUserId = parentComment.UserId
+				targetUserId = parentComment.CommenterId
 			}
 		} else {
 			targetUserId = post.UserId
 		}
 
-		if targetUserId == uuid.Nil || targetUserId == req.UserId {
+		if targetUserId == uuid.Nil || targetUserId == req.CommenterId {
 			return
 		}
 
 		notification := &entities.Notification{
-			FromUserId: req.UserId,
+			FromUserId: req.CommenterId,
 			ToUserId:   targetUserId,
 			Type:       "comment",
 			Metadata:   json.RawMessage(metaData),
@@ -98,12 +101,13 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 	}()
 
 	return &CreateCommentResponse{
-		Id:        comment.Id,
-		PostId:    comment.PostId,
-		UserId:    comment.UserId,
-		ParentId:  comment.ParentId,
-		Metadata:  metaDataMap,
-		CreatedAt: comment.CreatedAt,
+		Id:          comment.Id,
+		PostId:      comment.PostId,
+		PostOwnerId: post.UserId,
+		CommenterId: comment.CommenterId,
+		ParentId:    comment.ParentId,
+		Metadata:    metaDataMap,
+		CreatedAt:   comment.CreatedAt,
 	}, nil
 }
 
@@ -115,7 +119,7 @@ func (c *CommentServiceImp) UpdateComment(req *UpdateCommentRequest) (*UpdateCom
 	if comment == nil {
 		return nil, errors.New("Comment not found")
 	}
-	if comment.UserId != req.UserId {
+	if comment.CommenterId != req.CommenterId {
 		return nil, errors.New("You are not authorized to update this comment")
 	}
 	comment.Content = req.Content
@@ -124,11 +128,11 @@ func (c *CommentServiceImp) UpdateComment(req *UpdateCommentRequest) (*UpdateCom
 		return nil, err
 	}
 	return &UpdateCommentResponse{
-		Id:        comment.Id,
-		PostId:    comment.PostId,
-		UserId:    comment.UserId,
-		Content:   comment.Content,
-		UpdatedAt: comment.UpdatedAt,
+		Id:          comment.Id,
+		PostId:      comment.PostId,
+		CommenterId: comment.CommenterId,
+		Content:     comment.Content,
+		UpdatedAt:   comment.UpdatedAt,
 	}, nil
 }
 

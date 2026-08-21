@@ -3,6 +3,7 @@ package comment
 import (
 	"net/http"
 
+	"hub/internal/websocket"
 	"hub/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,11 @@ import (
 
 type CommentController struct {
 	commentService CommentService
+	hub            *websocket.Hub
 }
 
-func NewCommentController(commentService CommentService) *CommentController {
-	return &CommentController{commentService: commentService}
+func NewCommentController(commentService CommentService, hub *websocket.Hub) *CommentController {
+	return &CommentController{commentService: commentService, hub: hub}
 }
 
 // GetAll 			godoc
@@ -82,13 +84,19 @@ func (c *CommentController) CreateComment(ctx *gin.Context) {
 
 	userId, _ := ctx.Get("userId")
 	createCommentRequest.PostId = postId
-	createCommentRequest.UserId = userId.(uuid.UUID)
+	createCommentRequest.CommenterId = userId.(uuid.UUID)
 
 	result, err := c.commentService.CreateComment(&createCommentRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	msg := &websocket.NotificationMessage{
+		TargetUserID: result.PostOwnerId.String(),
+		Data:         []byte("Bình luận mới"),
+	}
+	c.hub.SendToUser <- msg
 
 	response.Success(ctx, http.StatusOK, "Tạo bình luận thành công", result)
 }
@@ -118,7 +126,7 @@ func (c *CommentController) UpdateComment(ctx *gin.Context) {
 
 	userId, _ := ctx.Get("userId")
 	updateCommentRequest.Id = commentId
-	updateCommentRequest.UserId = userId.(uuid.UUID)
+	updateCommentRequest.CommenterId = userId.(uuid.UUID)
 
 	result, err := c.commentService.UpdateComment(&updateCommentRequest)
 	if err != nil {

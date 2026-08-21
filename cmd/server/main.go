@@ -6,8 +6,12 @@ import (
 	"time"
 
 	"hub/internal/database"
+	"hub/internal/modules/attachment"
 	"hub/internal/modules/auth"
+	"hub/internal/modules/comment"
 	"hub/internal/modules/post"
+
+	"hub/internal/websocket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -42,6 +46,15 @@ func main() {
 
 	// Khởi tạo router mặc định của Gin
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
+
+	// Khởi tạo Hub
+	hub := websocket.NewHub()
+	// Chạy goroutine quản lý hub
+	go hub.Run()
+
+	// Khai báo đường dẫn kết nối WebSocket
+	r.GET("/ws", websocket.ServeWs(hub))
 
 	// API Health Check
 	r.GET("/", func(c *gin.Context) {
@@ -58,6 +71,9 @@ func main() {
 	// Routers
 	auth.AuthRouter(r, database.DB)
 	post.PostRouter(r, database.DB)
+	attachment.AttachmentRouter(r, database.DB)
+	comment.CommentRouter(r, database.DB, hub)
+
 	// Chạy server ở cổng 2808
 	r.Run(":2808")
 }
