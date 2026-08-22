@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"hub/internal/database/entities"
 	"hub/pkg/authenticate"
@@ -12,8 +13,8 @@ import (
 )
 
 type UserService interface {
-	Register(req *RegisterRequest) (*RegisterResponse, error)
-	Login(req *LoginRequest) (*LoginResponse, error)
+	Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error)
+	Login(ctx context.Context, req *LoginRequest) (*LoginResponse, error)
 }
 
 type UserServiceImp struct {
@@ -24,8 +25,8 @@ func NewUserServiceImp(repo UserRepository) *UserServiceImp {
 	return &UserServiceImp{userRepo: repo}
 }
 
-func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, error) {
-	emailUser, err := u.userRepo.FindUserByEmail(req.Email)
+func (u *UserServiceImp) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
+	emailUser, err := u.userRepo.FindUserByEmail(ctx, req.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, erro
 		return nil, errors.New("Email already exists")
 	}
 
-	phoneUser, err := u.userRepo.FindUserByPhone(req.Phone)
+	phoneUser, err := u.userRepo.FindUserByPhone(ctx, req.Phone)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, erro
 		return nil, errors.New("Phone already exists")
 	}
 
-	usernameUser, err := u.userRepo.FindUserName(req.UserName)
+	usernameUser, err := u.userRepo.FindUserName(ctx, req.UserName)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -60,10 +61,10 @@ func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, erro
 		Phone:    req.Phone,
 		Password: string(passwordHash),
 	}
-	if u.userRepo.CheckEmptyDB() == true {
+	if u.userRepo.CheckEmptyDB(ctx) == true {
 		user.Role = "ADMIN"
 	}
-	err = u.userRepo.CreateUser(user)
+	err = u.userRepo.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +76,8 @@ func (u *UserServiceImp) Register(req *RegisterRequest) (*RegisterResponse, erro
 	}, nil
 }
 
-func (u *UserServiceImp) Login(req *LoginRequest) (*LoginResponse, error) {
-	user, err := u.userRepo.FindUserByEmail(req.Email)
+func (u *UserServiceImp) Login(ctx context.Context, req *LoginRequest) (*LoginResponse, error) {
+	user, err := u.userRepo.FindUserByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, errors.New("Incorrect email or password")
 	}
@@ -102,7 +103,7 @@ func (u *UserServiceImp) Login(req *LoginRequest) (*LoginResponse, error) {
 		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),
 	}
 
-	err = u.userRepo.CreateRefreshToken(refreshTokenEntity)
+	err = u.userRepo.CreateRefreshToken(ctx, refreshTokenEntity)
 	if err != nil {
 		return nil, err
 	}

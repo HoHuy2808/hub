@@ -45,7 +45,7 @@ func (a *AttachmentController) GetAll(ctx *gin.Context) {
 
 	queryParams.PostId = postId
 
-	attachments, total, err := a.attachmentService.GetAll(queryParams)
+	attachments, total, err := a.attachmentService.GetAll(ctx.Request.Context(), queryParams)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -88,7 +88,7 @@ func (a *AttachmentController) GetAllByUser(ctx *gin.Context) {
 
 	queryParams.UserId = UserId
 
-	attachments, total, err := a.attachmentService.GetAll(queryParams)
+	attachments, total, err := a.attachmentService.GetAll(ctx.Request.Context(), queryParams)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -127,7 +127,7 @@ func (a *AttachmentController) AddAttachment(ctx *gin.Context) {
 
 	addAttachmentRequest.PostId = postId
 
-	result, err := a.attachmentService.AddAttachment(&addAttachmentRequest)
+	result, err := a.attachmentService.AddAttachment(ctx.Request.Context(), &addAttachmentRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -154,7 +154,7 @@ func (a *AttachmentController) DeleteAttachment(ctx *gin.Context) {
 		return
 	}
 
-	err = a.attachmentService.DeleteAttachment(attachmentId)
+	err = a.attachmentService.DeleteAttachment(ctx.Request.Context(), attachmentId)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return

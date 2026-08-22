@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -13,10 +14,10 @@ import (
 )
 
 type CommentService interface {
-	GetAll(params QueryParams) ([]entities.Comment, int64, error)
-	CreateComment(comment *CreateCommentRequest) (*CreateCommentResponse, error)
-	UpdateComment(comment *UpdateCommentRequest) (*UpdateCommentResponse, error)
-	DeleteComment(id uuid.UUID, userId uuid.UUID) (bool, error)
+	GetAll(ctx context.Context, params QueryParams) ([]entities.Comment, int64, error)
+	CreateComment(ctx context.Context, comment *CreateCommentRequest) (*CreateCommentResponse, error)
+	UpdateComment(ctx context.Context, comment *UpdateCommentRequest) (*UpdateCommentResponse, error)
+	DeleteComment(ctx context.Context, id uuid.UUID, userId uuid.UUID) (bool, error)
 }
 
 type CommentServiceImp struct {
@@ -37,12 +38,12 @@ func NewCommentServiceImp(
 	}
 }
 
-func (c *CommentServiceImp) GetAll(params QueryParams) ([]entities.Comment, int64, error) {
-	return c.commentRepo.GetAll(params)
+func (c *CommentServiceImp) GetAll(ctx context.Context, params QueryParams) ([]entities.Comment, int64, error) {
+	return c.commentRepo.GetAll(ctx, params)
 }
 
-func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCommentResponse, error) {
-	post, err := c.postRepo.FindPostById(req.PostId)
+func (c *CommentServiceImp) CreateComment(ctx context.Context, req *CreateCommentRequest) (*CreateCommentResponse, error) {
+	post, err := c.postRepo.FindPostById(ctx, req.PostId)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 		Content:     req.Content,
 	}
 
-	err = c.commentRepo.CreateComment(comment)
+	err = c.commentRepo.CreateComment(ctx, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +78,10 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 			}
 		}()
 
+		bgCtx := context.Background()
 		var targetUserId uuid.UUID
 		if req.ParentId != nil {
-			parentComment, err := c.commentRepo.FindCommentById(*req.ParentId)
+			parentComment, err := c.commentRepo.FindCommentById(bgCtx, *req.ParentId)
 			if err == nil {
 				targetUserId = parentComment.CommenterId
 			}
@@ -97,7 +99,12 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 			Type:       "comment",
 			Metadata:   json.RawMessage(metaData),
 		}
-		c.notificationRepo.CreateNotification(notification)
+		// Note: notificationRepo isn't updated yet, this will fail build until notification module is updated.
+		// So temporarily pass context.Background() if needed, but since we are updating all, I will add bgCtx
+		// Wait, if I add it now, it will break. I'll pass bgCtx but assume it's updated. 
+		// Ah, actually let me not pass bgCtx to CreateNotification until notification is updated, or I can just pass it now.
+		// Wait, I will just pass bgCtx because I will update notification soon.
+		c.notificationRepo.CreateNotification(bgCtx, notification)
 	}()
 
 	return &CreateCommentResponse{
@@ -111,8 +118,8 @@ func (c *CommentServiceImp) CreateComment(req *CreateCommentRequest) (*CreateCom
 	}, nil
 }
 
-func (c *CommentServiceImp) UpdateComment(req *UpdateCommentRequest) (*UpdateCommentResponse, error) {
-	comment, err := c.commentRepo.FindCommentById(req.Id)
+func (c *CommentServiceImp) UpdateComment(ctx context.Context, req *UpdateCommentRequest) (*UpdateCommentResponse, error) {
+	comment, err := c.commentRepo.FindCommentById(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +130,7 @@ func (c *CommentServiceImp) UpdateComment(req *UpdateCommentRequest) (*UpdateCom
 		return nil, errors.New("You are not authorized to update this comment")
 	}
 	comment.Content = req.Content
-	err = c.commentRepo.UpdateComment(comment)
+	err = c.commentRepo.UpdateComment(ctx, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -136,6 +143,6 @@ func (c *CommentServiceImp) UpdateComment(req *UpdateCommentRequest) (*UpdateCom
 	}, nil
 }
 
-func (c *CommentServiceImp) DeleteComment(id uuid.UUID, userId uuid.UUID) (bool, error) {
-	return c.commentRepo.DeleteComment(id, userId)
+func (c *CommentServiceImp) DeleteComment(ctx context.Context, id uuid.UUID, userId uuid.UUID) (bool, error) {
+	return c.commentRepo.DeleteComment(ctx, id, userId)
 }

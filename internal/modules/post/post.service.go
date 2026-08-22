@@ -1,16 +1,17 @@
 package post
 
 import (
+	"context"
 	"hub/internal/database/entities"
 
 	"github.com/google/uuid"
 )
 
 type PostService interface {
-	GetAll(params QueryParams) ([]entities.Post, int64, error)
-	CreatePost(post *CreatePostRequest) (*CreatePostResponse, error)
-	UpdatePost(post *UpdatePostRequest) (*UpdatePostResponse, error)
-	DeletePost(postId uuid.UUID, userId uuid.UUID) (bool, error)
+	GetAll(ctx context.Context, params QueryParams) ([]entities.Post, int64, error)
+	CreatePost(ctx context.Context, post *CreatePostRequest) (*CreatePostResponse, error)
+	UpdatePost(ctx context.Context, post *UpdatePostRequest) (*UpdatePostResponse, error)
+	DeletePost(ctx context.Context, postId uuid.UUID, userId uuid.UUID) (bool, error)
 }
 
 type PostServiceImp struct {
@@ -20,11 +21,11 @@ type PostServiceImp struct {
 func NewPostServiceImp(postRepo PostRepository) *PostServiceImp {
 	return &PostServiceImp{postRepo: postRepo}
 }
-func (p *PostServiceImp) GetAll(params QueryParams) ([]entities.Post, int64, error) {
-	return p.postRepo.GetAll(params)
+func (p *PostServiceImp) GetAll(ctx context.Context, params QueryParams) ([]entities.Post, int64, error) {
+	return p.postRepo.GetAll(ctx, params)
 }
 
-func (p *PostServiceImp) CreatePost(post *CreatePostRequest) (*CreatePostResponse, error) {
+func (p *PostServiceImp) CreatePost(ctx context.Context, post *CreatePostRequest) (*CreatePostResponse, error) {
 	var listAttachments []entities.PostAttachment
 	for _, attachment := range post.Attachments {
 		listAttachments = append(listAttachments, entities.PostAttachment{
@@ -39,7 +40,7 @@ func (p *PostServiceImp) CreatePost(post *CreatePostRequest) (*CreatePostRespons
 		IsPublic:    post.IsPublic,
 	}
 
-	if err := p.postRepo.CreatePost(newPost); err != nil {
+	if err := p.postRepo.CreatePost(ctx, newPost); err != nil {
 		return nil, err
 	}
 	return &CreatePostResponse{
@@ -52,8 +53,8 @@ func (p *PostServiceImp) CreatePost(post *CreatePostRequest) (*CreatePostRespons
 	}, nil
 }
 
-func (p *PostServiceImp) UpdatePost(post *UpdatePostRequest) (*UpdatePostResponse, error) {
-	existingPost, err := p.postRepo.FindPostById(post.Id)
+func (p *PostServiceImp) UpdatePost(ctx context.Context, post *UpdatePostRequest) (*UpdatePostResponse, error) {
+	existingPost, err := p.postRepo.FindPostById(ctx, post.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (p *PostServiceImp) UpdatePost(post *UpdatePostRequest) (*UpdatePostRespons
 		existingPost.IsPublic = post.IsPublic
 	}
 
-	err = p.postRepo.UpdatePost(existingPost)
+	err = p.postRepo.UpdatePost(ctx, existingPost)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +78,6 @@ func (p *PostServiceImp) UpdatePost(post *UpdatePostRequest) (*UpdatePostRespons
 	}, nil
 }
 
-func (p *PostServiceImp) DeletePost(postId uuid.UUID, userId uuid.UUID) (bool, error) {
-	return p.postRepo.DeletePost(postId, userId)
+func (p *PostServiceImp) DeletePost(ctx context.Context, postId uuid.UUID, userId uuid.UUID) (bool, error) {
+	return p.postRepo.DeletePost(ctx, postId, userId)
 }

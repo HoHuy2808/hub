@@ -34,7 +34,7 @@ func (u *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	result, err := u.userService.Register(&registerInput)
+	result, err := u.userService.Register(ctx.Request.Context(), &registerInput)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -59,7 +59,7 @@ func (u *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	result, err := u.userService.Login(&loginInput)
+	result, err := u.userService.Login(ctx.Request.Context(), &loginInput)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return

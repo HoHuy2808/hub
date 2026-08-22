@@ -21,7 +21,7 @@ type User struct {
 	Profile      UserProfile    `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
 	RefreshToken []RefreshToken `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
 	Posts        []Post         `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
-	Reaction     []Reaction     `gorm:"foreignKey:UserId;references:Id;constraint:OnDelete:CASCADE;"`
+	Reaction     []Reaction     `gorm:"foreignKey:ReactorId;references:Id;constraint:OnDelete:CASCADE;"`
 	Comments     []Comment      `gorm:"foreignKey:CommenterId;references:Id;constraint:OnDelete:CASCADE;"`
 
 	SentRequest     []Request `gorm:"foreignKey:SenderId;references:Id;constraint:OnDelete:CASCADE;"`

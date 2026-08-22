@@ -1,6 +1,7 @@
 package post
 
 import (
+	"context"
 	"hub/internal/database/entities"
 
 	"github.com/google/uuid"
@@ -8,11 +9,11 @@ import (
 )
 
 type PostRepository interface {
-	GetAll(params QueryParams) ([]entities.Post, int64, error)
-	CreatePost(post *entities.Post) error
-	UpdatePost(post *entities.Post) error
-	FindPostById(postId uuid.UUID) (*entities.Post, error)
-	DeletePost(postId uuid.UUID, userId uuid.UUID) (bool, error)
+	GetAll(ctx context.Context, params QueryParams) ([]entities.Post, int64, error)
+	CreatePost(ctx context.Context, post *entities.Post) error
+	UpdatePost(ctx context.Context, post *entities.Post) error
+	FindPostById(ctx context.Context, postId uuid.UUID) (*entities.Post, error)
+	DeletePost(ctx context.Context, postId uuid.UUID, userId uuid.UUID) (bool, error)
 }
 
 type PostRepositoryImp struct {
@@ -23,12 +24,21 @@ func NewPostRepositoryImp(db *gorm.DB) *PostRepositoryImp {
 	return &PostRepositoryImp{db: db}
 }
 
-func (p *PostRepositoryImp) GetAll(params QueryParams) ([]entities.Post, int64, error) {
+func (p *PostRepositoryImp) getDB(ctx context.Context) *gorm.DB {
+	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	if ok {
+		return tx
+	}
+	return p.db
+}
+
+func (p *PostRepositoryImp) GetAll(ctx context.Context, params QueryParams) ([]entities.Post, int64, error) {
 	var posts []entities.Post
 	var total int64
 
 	// Tạo câu truy vấn ban đầu
-	query := p.db.Model(&entities.Post{})
+	db := p.getDB(ctx)
+	query := db.Model(&entities.Post{})
 
 	// Filter
 	if params.Search != "" {
@@ -55,17 +65,18 @@ func (p *PostRepositoryImp) GetAll(params QueryParams) ([]entities.Post, int64, 
 	return posts, total, nil
 }
 
-func (p *PostRepositoryImp) CreatePost(post *entities.Post) error {
-	result := p.db.Create(post)
+func (p *PostRepositoryImp) CreatePost(ctx context.Context, post *entities.Post) error {
+	db := p.getDB(ctx)
+	result := db.Create(post)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (p *PostRepositoryImp) UpdatePost(post *entities.Post) error {
-	// result := p.db.Save(post)
-	result := p.db.Model(post).Updates(map[string]interface{}{
+func (p *PostRepositoryImp) UpdatePost(ctx context.Context, post *entities.Post) error {
+	db := p.getDB(ctx)
+	result := db.Model(post).Updates(map[string]interface{}{
 		"content":   post.Content,
 		"is_public": post.IsPublic,
 	})
@@ -75,17 +86,19 @@ func (p *PostRepositoryImp) UpdatePost(post *entities.Post) error {
 	return nil
 }
 
-func (p *PostRepositoryImp) FindPostById(postId uuid.UUID) (post *entities.Post, err error) {
-	result := p.db.Find(&post, postId)
+func (p *PostRepositoryImp) FindPostById(ctx context.Context, postId uuid.UUID) (post *entities.Post, err error) {
+	db := p.getDB(ctx)
+	result := db.Find(&post, postId)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return post, nil
 }
 
-func (p *PostRepositoryImp) DeletePost(postId uuid.UUID, userId uuid.UUID) (bool, error) {
-	// result := p.db.Delete(&entities.Post{}, postId)
-	result := p.db.Where("id = ? AND user_id = ?", postId, userId).Delete(&entities.Post{})
+func (p *PostRepositoryImp) DeletePost(ctx context.Context, postId uuid.UUID, userId uuid.UUID) (bool, error) {
+	db := p.getDB(ctx)
+	// result := db.Delete(&entities.Post{}, postId)
+	result := db.Where("id = ? AND user_id = ?", postId, userId).Delete(&entities.Post{})
 	if result.Error != nil {
 		return false, result.Error
 	}
