@@ -99,11 +99,7 @@ func (c *CommentServiceImp) CreateComment(ctx context.Context, req *CreateCommen
 			Type:       "comment",
 			Metadata:   json.RawMessage(metaData),
 		}
-		// Note: notificationRepo isn't updated yet, this will fail build until notification module is updated.
-		// So temporarily pass context.Background() if needed, but since we are updating all, I will add bgCtx
-		// Wait, if I add it now, it will break. I'll pass bgCtx but assume it's updated. 
-		// Ah, actually let me not pass bgCtx to CreateNotification until notification is updated, or I can just pass it now.
-		// Wait, I will just pass bgCtx because I will update notification soon.
+
 		c.notificationRepo.CreateNotification(bgCtx, notification)
 	}()
 
