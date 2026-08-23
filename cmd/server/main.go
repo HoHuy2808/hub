@@ -10,6 +10,7 @@ import (
 	"hub/internal/modules/auth"
 	"hub/internal/modules/comment"
 	"hub/internal/modules/post"
+	"hub/internal/modules/reaction"
 
 	"hub/internal/websocket"
 
@@ -73,6 +74,7 @@ func main() {
 	post.PostRouter(r, database.DB)
 	attachment.AttachmentRouter(r, database.DB)
 	comment.CommentRouter(r, database.DB, hub)
+	reaction.ReactRouter(r, database.DB, hub)
 
 	// Chạy server ở cổng 2808
 	r.Run(":2808")

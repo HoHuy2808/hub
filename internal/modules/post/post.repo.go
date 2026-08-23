@@ -77,8 +77,9 @@ func (p *PostRepositoryImp) CreatePost(ctx context.Context, post *entities.Post)
 func (p *PostRepositoryImp) UpdatePost(ctx context.Context, post *entities.Post) error {
 	db := p.getDB(ctx)
 	result := db.Model(post).Updates(map[string]interface{}{
-		"content":   post.Content,
-		"is_public": post.IsPublic,
+		"content":        post.Content,
+		"is_public":      post.IsPublic,
+		"total_reaction": post.TotalReaction,
 	})
 	if result.Error != nil {
 		return result.Error
