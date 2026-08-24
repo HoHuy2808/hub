@@ -23,10 +23,11 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    - name: Install golangci-lint
+      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
     - name: Run linter
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version: latest
+      run: golangci-lint run
 
     - name: Run unit tests with coverage
       run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
