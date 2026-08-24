@@ -76,7 +76,6 @@ func (r *ReactionServiceImp) React(ctx context.Context, req *ReactRequest) (*Rea
 	}
 
 	err = r.txManager.ExecTx(ctx, func(txCtx context.Context) error {
-		// Tạo reaction với txCtx thay vì ctx gốc
 		if err := r.reactionRepo.React(txCtx, reaction); err != nil {
 			return err
 		}
@@ -84,23 +83,24 @@ func (r *ReactionServiceImp) React(ctx context.Context, req *ReactRequest) (*Rea
 		if err := r.postRepo.UpdatePost(txCtx, post); err != nil {
 			return err
 		}
-
-		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.Println("Recovered in CreateNotification", r)
-				}
-			}()
-			bgCtx := context.Background()
-			if err := r.notificationRepo.CreateNotification(bgCtx, notification); err != nil {
-				log.Println("CreateNotification error:", err)
-			}
-		}()
 		return nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("Recovered in CreateNotification", r)
+			}
+		}()
+		bgCtx := context.Background()
+		if err := r.notificationRepo.CreateNotification(bgCtx, notification); err != nil {
+			log.Println("CreateNotification error:", err)
+		}
+	}()
 
 	return &ReactResponse{
 		Id:          reaction.Id,
