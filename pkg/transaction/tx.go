@@ -6,6 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type contextKey string
+
+const TxKey contextKey = "TxKey"
+
 type TransactionManager interface {
 	ExecTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
@@ -20,7 +24,7 @@ func NewTransactionManager(db *gorm.DB) TransactionManager {
 
 func (t *TransactionManagerImp) ExecTx(ctx context.Context, fn func(ctx context.Context) error) error {
 	return t.db.Transaction(func(tx *gorm.DB) error {
-		txCtx := context.WithValue(ctx, "TxKey", tx)
+		txCtx := context.WithValue(ctx, TxKey, tx)
 		return fn(txCtx)
 	})
 }

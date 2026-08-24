@@ -3,6 +3,7 @@ package comment
 import (
 	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -25,7 +26,7 @@ func NewCommentRepositoryImp(db *gorm.DB) *CommentRepositoryImp {
 }
 
 func (c *CommentRepositoryImp) getDB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
 	if ok {
 		return tx
 	}

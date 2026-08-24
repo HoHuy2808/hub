@@ -3,6 +3,7 @@ package reaction
 import (
 	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -26,11 +27,11 @@ func NewReactionRepositoryImp(db *gorm.DB) *ReactionRepositoryImp {
 
 // Kiểm tra xem trong Context có tx không. Có thì dùng tx, không có thì dùng db gốc.
 func (r *ReactionRepositoryImp) getDB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
 	if ok {
-		return tx // Đang nằm trong Transaction
+		return tx
 	}
-	return r.db // Chạy đơn lẻ bình thường
+	return r.db
 }
 
 func (r *ReactionRepositoryImp) GetAll(ctx context.Context, params *QueryParams) ([]*entities.Reaction, int64, error) {

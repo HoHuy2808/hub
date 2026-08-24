@@ -61,7 +61,7 @@ func (u *UserServiceImp) Register(ctx context.Context, req *RegisterRequest) (*R
 		Phone:    req.Phone,
 		Password: string(passwordHash),
 	}
-	if u.userRepo.CheckEmptyDB(ctx) == true {
+	if u.userRepo.CheckEmptyDB(ctx) {
 		user.Role = "ADMIN"
 	}
 	err = u.userRepo.CreateUser(ctx, user)

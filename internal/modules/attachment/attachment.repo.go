@@ -3,6 +3,7 @@ package attachment
 import (
 	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -23,7 +24,7 @@ func NewAttachmentRepositoryImp(db *gorm.DB) *AttachmentRepositoryImp {
 }
 
 func (a *AttachmentRepositoryImp) getDB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
 	if ok {
 		return tx
 	}

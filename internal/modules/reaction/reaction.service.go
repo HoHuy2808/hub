@@ -98,6 +98,9 @@ func (r *ReactionServiceImp) React(ctx context.Context, req *ReactRequest) (*Rea
 		}()
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &ReactResponse{
 		Id:          reaction.Id,

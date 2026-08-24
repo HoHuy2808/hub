@@ -3,6 +3,8 @@ package notification
 import (
 	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
+
 	"gorm.io/gorm"
 )
 
@@ -19,7 +21,7 @@ func NewNotificationRepositoryImp(db *gorm.DB) *NotificationRepositoryImp {
 }
 
 func (n *NotificationRepositoryImp) getDB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
 	if ok {
 		return tx
 	}

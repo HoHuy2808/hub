@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"gorm.io/gorm"
 )
@@ -25,7 +26,7 @@ func NewUserRepositoryImp(db *gorm.DB) *UserRepositoryImp {
 }
 
 func (u *UserRepositoryImp) getDB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value("TxKey").(*gorm.DB)
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
 	if ok {
 		return tx
 	}
@@ -66,10 +67,7 @@ func (u *UserRepositoryImp) CheckEmptyDB(ctx context.Context) bool {
 	var count int64
 	db := u.getDB(ctx)
 	db.Model(&entities.User{}).Count(&count)
-	if count == 0 {
-		return true
-	}
-	return false
+	return count == 0
 }
 
 func (u *UserRepositoryImp) CreateUser(ctx context.Context, user *entities.User) (err error) {

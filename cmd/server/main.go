@@ -47,7 +47,7 @@ func main() {
 
 	// Khởi tạo router mặc định của Gin
 	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	_ = r.SetTrustedProxies(nil)
 
 	// Khởi tạo Hub
 	hub := websocket.NewHub()
@@ -77,5 +77,7 @@ func main() {
 	reaction.ReactRouter(r, database.DB, hub)
 
 	// Chạy server ở cổng 2808
-	r.Run(":2808")
+	if err := r.Run(":2808"); err != nil {
+		fmt.Println("❌ Lỗi khởi chạy server:", err)
+	}
 }

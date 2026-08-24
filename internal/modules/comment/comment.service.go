@@ -100,7 +100,7 @@ func (c *CommentServiceImp) CreateComment(ctx context.Context, req *CreateCommen
 			Metadata:   json.RawMessage(metaData),
 		}
 
-		c.notificationRepo.CreateNotification(bgCtx, notification)
+		_ = c.notificationRepo.CreateNotification(bgCtx, notification)
 	}()
 
 	return &CreateCommentResponse{
