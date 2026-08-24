@@ -13,9 +13,6 @@ FROM alpine:latest
 WORKDIR /root/
 
 COPY --from=builder /app/gin-app .
-COPY --from=builder /app/templates ./templates
-COPY --from=builder /app/static ./static
-COPY --from=builder /app/config.yaml .
 
 EXPOSE 2808
 
