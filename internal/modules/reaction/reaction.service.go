@@ -76,7 +76,7 @@ func (r *ReactionServiceImp) React(ctx context.Context, req *ReactRequest) (*Rea
 	}
 
 	err = r.txManager.ExecTx(ctx, func(txCtx context.Context) error {
-		// Gọi logic tạo reaction với txCtx thay vì ctx gốc
+		// Tạo reaction với txCtx thay vì ctx gốc
 		if err := r.reactionRepo.React(txCtx, reaction); err != nil {
 			return err
 		}
