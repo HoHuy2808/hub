@@ -1,18 +1,20 @@
 package comment
 
 import (
+	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type CommentRepository interface {
-	GetAll(params QueryParams) ([]entities.Comment, int64, error)
-	CreateComment(comment *entities.Comment) error
-	UpdateComment(comment *entities.Comment) error
-	DeleteComment(id uuid.UUID, userId uuid.UUID) (bool, error)
-	FindCommentById(id uuid.UUID) (*entities.Comment, error)
+	GetAll(ctx context.Context, params QueryParams) ([]entities.Comment, int64, error)
+	CreateComment(ctx context.Context, comment *entities.Comment) error
+	UpdateComment(ctx context.Context, comment *entities.Comment) error
+	DeleteComment(ctx context.Context, id uuid.UUID, userId uuid.UUID) (bool, error)
+	FindCommentById(ctx context.Context, id uuid.UUID) (*entities.Comment, error)
 }
 
 type CommentRepositoryImp struct {
@@ -23,12 +25,21 @@ func NewCommentRepositoryImp(db *gorm.DB) *CommentRepositoryImp {
 	return &CommentRepositoryImp{db: db}
 }
 
-func (c *CommentRepositoryImp) GetAll(params QueryParams) ([]entities.Comment, int64, error) {
+func (c *CommentRepositoryImp) getDB(ctx context.Context) *gorm.DB {
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
+	if ok {
+		return tx
+	}
+	return c.db
+}
+
+func (c *CommentRepositoryImp) GetAll(ctx context.Context, params QueryParams) ([]entities.Comment, int64, error) {
 	var comments []entities.Comment
 	var total int64
 
 	// Chỉ lấy comment của bài viết hiện tại
-	query := c.db.Model(&entities.Comment{}).Where("post_id = ?", params.PostId)
+	db := c.getDB(ctx)
+	query := db.Model(&entities.Comment{}).Where("post_id = ?", params.PostId)
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -59,16 +70,18 @@ func (c *CommentRepositoryImp) GetAll(params QueryParams) ([]entities.Comment, i
 	return comments, total, nil
 }
 
-func (c *CommentRepositoryImp) CreateComment(comment *entities.Comment) error {
-	result := c.db.Create(comment)
+func (c *CommentRepositoryImp) CreateComment(ctx context.Context, comment *entities.Comment) error {
+	db := c.getDB(ctx)
+	result := db.Create(comment)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (c *CommentRepositoryImp) UpdateComment(comment *entities.Comment) error {
-	result := c.db.Model(comment).Updates(map[string]interface{}{
+func (c *CommentRepositoryImp) UpdateComment(ctx context.Context, comment *entities.Comment) error {
+	db := c.getDB(ctx)
+	result := db.Model(comment).Updates(map[string]interface{}{
 		"content": comment.Content,
 	})
 	if result.Error != nil {
@@ -77,17 +90,19 @@ func (c *CommentRepositoryImp) UpdateComment(comment *entities.Comment) error {
 	return nil
 }
 
-func (c *CommentRepositoryImp) DeleteComment(id uuid.UUID, userId uuid.UUID) (bool, error) {
-	result := c.db.Where("id = ? AND user_id = ?", id, userId).Delete(&entities.Comment{})
+func (c *CommentRepositoryImp) DeleteComment(ctx context.Context, id uuid.UUID, userId uuid.UUID) (bool, error) {
+	db := c.getDB(ctx)
+	result := db.Where("id = ? AND user_id = ?", id, userId).Delete(&entities.Comment{})
 	if result.Error != nil {
 		return false, result.Error
 	}
 	return result.RowsAffected > 0, nil
 }
 
-func (c *CommentRepositoryImp) FindCommentById(id uuid.UUID) (*entities.Comment, error) {
+func (c *CommentRepositoryImp) FindCommentById(ctx context.Context, id uuid.UUID) (*entities.Comment, error) {
 	var comment entities.Comment
-	result := c.db.First(&comment, "id = ?", id)
+	db := c.getDB(ctx)
+	result := db.First(&comment, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}

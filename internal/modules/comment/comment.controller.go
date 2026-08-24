@@ -3,6 +3,7 @@ package comment
 import (
 	"net/http"
 
+	"hub/internal/websocket"
 	"hub/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,11 @@ import (
 
 type CommentController struct {
 	commentService CommentService
+	hub            *websocket.Hub
 }
 
-func NewCommentController(commentService CommentService) *CommentController {
-	return &CommentController{commentService: commentService}
+func NewCommentController(commentService CommentService, hub *websocket.Hub) *CommentController {
+	return &CommentController{commentService: commentService, hub: hub}
 }
 
 // GetAll 			godoc
@@ -44,7 +46,7 @@ func (c *CommentController) GetAll(ctx *gin.Context) {
 		return
 	}
 	params.PostId = postId
-	comments, total, err := c.commentService.GetAll(params)
+	comments, total, err := c.commentService.GetAll(ctx.Request.Context(), params)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -82,13 +84,19 @@ func (c *CommentController) CreateComment(ctx *gin.Context) {
 
 	userId, _ := ctx.Get("userId")
 	createCommentRequest.PostId = postId
-	createCommentRequest.UserId = userId.(uuid.UUID)
+	createCommentRequest.CommenterId = userId.(uuid.UUID)
 
-	result, err := c.commentService.CreateComment(&createCommentRequest)
+	result, err := c.commentService.CreateComment(ctx.Request.Context(), &createCommentRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	msg := &websocket.NotificationMessage{
+		TargetUserID: result.PostOwnerId.String(),
+		Data:         []byte("Bình luận mới"),
+	}
+	c.hub.SendToUser <- msg
 
 	response.Success(ctx, http.StatusOK, "Tạo bình luận thành công", result)
 }
@@ -118,9 +126,9 @@ func (c *CommentController) UpdateComment(ctx *gin.Context) {
 
 	userId, _ := ctx.Get("userId")
 	updateCommentRequest.Id = commentId
-	updateCommentRequest.UserId = userId.(uuid.UUID)
+	updateCommentRequest.CommenterId = userId.(uuid.UUID)
 
-	result, err := c.commentService.UpdateComment(&updateCommentRequest)
+	result, err := c.commentService.UpdateComment(ctx.Request.Context(), &updateCommentRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -147,7 +155,7 @@ func (c *CommentController) DeleteComment(ctx *gin.Context) {
 		return
 	}
 	userId, _ := ctx.Get("userId")
-	result, err := c.commentService.DeleteComment(commentId, userId.(uuid.UUID))
+	result, err := c.commentService.DeleteComment(ctx.Request.Context(), commentId, userId.(uuid.UUID))
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return

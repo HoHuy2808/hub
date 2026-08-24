@@ -543,6 +543,165 @@ const docTemplate = `{
                 }
             }
         },
+        "/reactions/{postId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all reactions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reaction"
+                ],
+                "summary": "Get all reactions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type of reaction",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "React to a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reaction"
+                ],
+                "summary": "React to a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reaction request",
+                        "name": "reactRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reaction.ReactRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/reaction.ReactResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unreact to a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reaction"
+                ],
+                "summary": "Unreact to a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/reaction.ReactResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update user's reaction to a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reaction"
+                ],
+                "summary": "Update a reaction",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "postId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update reaction request",
+                        "name": "updateReactRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reaction.UpdateReactRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/reaction.UpdateReactResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/me/attachments": {
             "get": {
                 "security": [
@@ -713,6 +872,9 @@ const docTemplate = `{
                 "post_id": {
                     "type": "string"
                 },
+                "post_owner_id": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "string"
                 }
@@ -806,6 +968,62 @@ const docTemplate = `{
                 },
                 "is_public": {
                     "type": "boolean"
+                }
+            }
+        },
+        "reaction.ReactRequest": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "reaction.ReactResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "string"
+                },
+                "post_owner_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "reaction.UpdateReactRequest": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "reaction.UpdateReactResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "string"
+                },
+                "post_owner_id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         }

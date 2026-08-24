@@ -37,7 +37,7 @@ func (p *PostController) GetAll(ctx *gin.Context) {
 		return
 	}
 
-	posts, total, err := p.postService.GetAll(query)
+	posts, total, err := p.postService.GetAll(ctx.Request.Context(), query)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -68,7 +68,7 @@ func (p *PostController) CreatePost(ctx *gin.Context) {
 	userId, _ := ctx.Get("userId")
 	createPostRequest.UserId = userId.(uuid.UUID)
 
-	result, err := p.postService.CreatePost(&createPostRequest)
+	result, err := p.postService.CreatePost(ctx.Request.Context(), &createPostRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -99,7 +99,7 @@ func (p *PostController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 	updatePostRequest.Id = postId
-	result, err := p.postService.UpdatePost(&updatePostRequest)
+	result, err := p.postService.UpdatePost(ctx.Request.Context(), &updatePostRequest)
 	if err != nil {
 		response.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -124,7 +124,7 @@ func (p *PostController) DeletePost(ctx *gin.Context) {
 		return
 	}
 	userId, _ := ctx.Get("userId")
-	result, err := p.postService.DeletePost(postId, userId.(uuid.UUID))
+	result, err := p.postService.DeletePost(ctx.Request.Context(), postId, userId.(uuid.UUID))
 	if err != nil {
 		response.Error(ctx, http.StatusInternalServerError, err.Error())
 		return

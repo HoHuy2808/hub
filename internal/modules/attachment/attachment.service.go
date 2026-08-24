@@ -1,15 +1,16 @@
 package attachment
 
 import (
+	"context"
 	"hub/internal/database/entities"
 
 	"github.com/google/uuid"
 )
 
 type AttachmentService interface {
-	GetAll(params QueryParams) ([]entities.PostAttachment, int64, error)
-	AddAttachment(req *AddAttachmentRequest) (*AddAttachmentResponse, error)
-	DeleteAttachment(id uuid.UUID) error
+	GetAll(ctx context.Context, params QueryParams) ([]entities.PostAttachment, int64, error)
+	AddAttachment(ctx context.Context, req *AddAttachmentRequest) (*AddAttachmentResponse, error)
+	DeleteAttachment(ctx context.Context, id uuid.UUID) error
 }
 
 type AttachmentServiceImp struct {
@@ -20,11 +21,11 @@ func NewAttachmentServiceImp(attachmentRepo AttachmentRepository) *AttachmentSer
 	return &AttachmentServiceImp{attachmentRepo: attachmentRepo}
 }
 
-func (a *AttachmentServiceImp) GetAll(params QueryParams) ([]entities.PostAttachment, int64, error) {
-	return a.attachmentRepo.GetAll(params)
+func (a *AttachmentServiceImp) GetAll(ctx context.Context, params QueryParams) ([]entities.PostAttachment, int64, error) {
+	return a.attachmentRepo.GetAll(ctx, params)
 }
 
-func (a *AttachmentServiceImp) AddAttachment(req *AddAttachmentRequest) (*AddAttachmentResponse, error) {
+func (a *AttachmentServiceImp) AddAttachment(ctx context.Context, req *AddAttachmentRequest) (*AddAttachmentResponse, error) {
 	var attachments []entities.PostAttachment
 
 	for _, url := range req.URLs {
@@ -35,7 +36,7 @@ func (a *AttachmentServiceImp) AddAttachment(req *AddAttachmentRequest) (*AddAtt
 		})
 	}
 
-	err := a.attachmentRepo.AddAttachment(attachments)
+	err := a.attachmentRepo.AddAttachment(ctx, attachments)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +47,6 @@ func (a *AttachmentServiceImp) AddAttachment(req *AddAttachmentRequest) (*AddAtt
 	}, nil
 }
 
-func (a *AttachmentServiceImp) DeleteAttachment(id uuid.UUID) error {
-	return a.attachmentRepo.DeleteAttachment(id)
+func (a *AttachmentServiceImp) DeleteAttachment(ctx context.Context, id uuid.UUID) error {
+	return a.attachmentRepo.DeleteAttachment(ctx, id)
 }

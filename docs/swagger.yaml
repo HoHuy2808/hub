@@ -84,6 +84,8 @@ definitions:
         type: string
       post_id:
         type: string
+      post_owner_id:
+        type: string
       user_id:
         type: string
     type: object
@@ -145,6 +147,42 @@ definitions:
         type: string
       is_public:
         type: boolean
+    type: object
+  reaction.ReactRequest:
+    properties:
+      type:
+        type: string
+    type: object
+  reaction.ReactResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      post_id:
+        type: string
+      post_owner_id:
+        type: string
+      type:
+        type: string
+    type: object
+  reaction.UpdateReactRequest:
+    properties:
+      type:
+        type: string
+    type: object
+  reaction.UpdateReactResponse:
+    properties:
+      id:
+        type: string
+      post_id:
+        type: string
+      post_owner_id:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
     type: object
 host: localhost:2808
 info:
@@ -488,6 +526,107 @@ paths:
       summary: Delete attachment
       tags:
       - Attachment
+  /reactions/{postId}:
+    delete:
+      description: Unreact to a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/reaction.ReactResponse'
+      security:
+      - BearerAuth: []
+      summary: Unreact to a post
+      tags:
+      - Reaction
+    get:
+      description: Get all reactions
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Type of reaction
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get all reactions
+      tags:
+      - Reaction
+    patch:
+      description: Update user's reaction to a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Update reaction request
+        in: body
+        name: updateReactRequest
+        required: true
+        schema:
+          $ref: '#/definitions/reaction.UpdateReactRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/reaction.UpdateReactResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a reaction
+      tags:
+      - Reaction
+    post:
+      description: React to a post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Reaction request
+        in: body
+        name: reactRequest
+        required: true
+        schema:
+          $ref: '#/definitions/reaction.ReactRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/reaction.ReactResponse'
+      security:
+      - BearerAuth: []
+      summary: React to a post
+      tags:
+      - Reaction
   /users/me/attachments:
     get:
       description: Get all attachments for a specific user

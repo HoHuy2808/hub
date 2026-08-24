@@ -1,16 +1,18 @@
 package attachment
 
 import (
+	"context"
 	"hub/internal/database/entities"
+	"hub/pkg/transaction"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AttachmentRepository interface {
-	GetAll(query QueryParams) ([]entities.PostAttachment, int64, error)
-	AddAttachment(attachments []entities.PostAttachment) error
-	DeleteAttachment(id uuid.UUID) error
+	GetAll(ctx context.Context, query QueryParams) ([]entities.PostAttachment, int64, error)
+	AddAttachment(ctx context.Context, attachments []entities.PostAttachment) error
+	DeleteAttachment(ctx context.Context, id uuid.UUID) error
 }
 
 type AttachmentRepositoryImp struct {
@@ -21,11 +23,20 @@ func NewAttachmentRepositoryImp(db *gorm.DB) *AttachmentRepositoryImp {
 	return &AttachmentRepositoryImp{db: db}
 }
 
-func (a *AttachmentRepositoryImp) GetAll(params QueryParams) ([]entities.PostAttachment, int64, error) {
+func (a *AttachmentRepositoryImp) getDB(ctx context.Context) *gorm.DB {
+	tx, ok := ctx.Value(transaction.TxKey).(*gorm.DB)
+	if ok {
+		return tx
+	}
+	return a.db
+}
+
+func (a *AttachmentRepositoryImp) GetAll(ctx context.Context, params QueryParams) ([]entities.PostAttachment, int64, error) {
 	var attachments []entities.PostAttachment
 	var total int64
 
-	query := a.db.Model(&entities.PostAttachment{})
+	db := a.getDB(ctx)
+	query := db.Model(&entities.PostAttachment{})
 
 	if params.PostId != (uuid.UUID{}) {
 		query = query.Where("post_attachments.post_id = ?", params.PostId)
@@ -49,13 +60,14 @@ func (a *AttachmentRepositoryImp) GetAll(params QueryParams) ([]entities.PostAtt
 	return attachments, total, nil
 }
 
-func (a *AttachmentRepositoryImp) AddAttachment(attachments []entities.PostAttachment) error {
+func (a *AttachmentRepositoryImp) AddAttachment(ctx context.Context, attachments []entities.PostAttachment) error {
 	if len(attachments) == 0 {
 		return nil
 	}
 
 	// Batch Insert (Tạo nhiều dòng cùng lúc) khi truyền vào một mảng (slice)
-	result := a.db.Create(&attachments)
+	db := a.getDB(ctx)
+	result := db.Create(&attachments)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -63,6 +75,7 @@ func (a *AttachmentRepositoryImp) AddAttachment(attachments []entities.PostAttac
 	return nil
 }
 
-func (a *AttachmentRepositoryImp) DeleteAttachment(id uuid.UUID) error {
-	return a.db.Where("id = ?", id).Delete(&entities.PostAttachment{}).Error
+func (a *AttachmentRepositoryImp) DeleteAttachment(ctx context.Context, id uuid.UUID) error {
+	db := a.getDB(ctx)
+	return db.Where("id = ?", id).Delete(&entities.PostAttachment{}).Error
 }
