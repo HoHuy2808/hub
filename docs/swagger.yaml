@@ -107,6 +107,33 @@ definitions:
       user_id:
         type: string
     type: object
+  contact.ContactResponse:
+    properties:
+      contact_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_blocked:
+        type: boolean
+      user_name:
+        type: string
+    type: object
+  contact.PaginatedContactResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/contact.ContactResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  contact.UpdateContact:
+    properties:
+      is_block:
+        type: boolean
+    type: object
   post.CreatePostRequest:
     properties:
       attachments:
@@ -183,6 +210,44 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  request.RequestResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      receiver_id:
+        type: string
+      sender_id:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  request.SendRequestReq:
+    properties:
+      receiver_id:
+        type: string
+    type: object
+  request.SendRequestRes:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      receiver_id:
+        type: string
+      status:
+        type: string
+    type: object
+  request.UpdateRequestReq:
+    properties:
+      status:
+        type: string
+    required:
+    - status
     type: object
 host: localhost:2808
 info:
@@ -342,6 +407,91 @@ paths:
       summary: Create a new comment
       tags:
       - Comment
+  /contacts:
+    get:
+      consumes:
+      - application/json
+      description: Get all contacts with pagination
+      parameters:
+      - description: User Name
+        in: query
+        name: userName
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Sort By
+        in: query
+        name: sortBy
+        type: string
+      - description: Sort Order
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contact.PaginatedContactResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all contacts
+      tags:
+      - Contact
+  /contacts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove someone from contact list
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Delete contact (Unfriend)
+      tags:
+      - Contact
+    patch:
+      consumes:
+      - application/json
+      description: Update contact status
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contact.UpdateContact'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Update contact (Block/Unblock)
+      tags:
+      - Contact
   /posts/:
     get:
       description: Get all posts with pagination
@@ -627,6 +777,97 @@ paths:
       summary: React to a post
       tags:
       - Reaction
+  /requests:
+    get:
+      consumes:
+      - application/json
+      description: Get all friend requests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/request.RequestResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all friend requests
+      tags:
+      - Request
+    post:
+      consumes:
+      - application/json
+      description: Send a friend request
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.SendRequestReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/request.SendRequestRes'
+      security:
+      - BearerAuth: []
+      summary: Send a friend request
+      tags:
+      - Request
+  /requests/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the request
+      parameters:
+      - description: Request ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Delete the request
+      tags:
+      - Request
+    patch:
+      consumes:
+      - application/json
+      description: Update a friend request
+      parameters:
+      - description: Request ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateRequestReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/request.SendRequestRes'
+      security:
+      - BearerAuth: []
+      summary: Update a friend request
+      tags:
+      - Request
   /users/me/attachments:
     get:
       description: Get all attachments for a specific user
