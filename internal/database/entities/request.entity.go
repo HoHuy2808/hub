@@ -12,6 +12,7 @@ const (
 	ACCEPT  RequestStatus = "ACCEPT"
 	PENDING RequestStatus = "PENDING"
 	REJECT  RequestStatus = "REJECT"
+	CANCEL  RequestStatus = "CANCEL"
 )
 
 type Request struct {
@@ -20,6 +21,7 @@ type Request struct {
 	ReceiverId uuid.UUID     `gorm:"type:uuid;not null;uniqueIndex"`
 	Status     RequestStatus `gorm:"type:string;not null;default:PENDING;"`
 	CreatedAt  time.Time     `gorm:"default:CURRENT_TIMESTAMP;"`
+	UpdatedAt  time.Time     `gorm:"default:CURRENT_TIMESTAMP;"`
 	DeletedAt  *time.Time    `gorm:"default:null;"`
 
 	Sender   *User `gorm:"foreignKey:SenderId;references:Id;constraint:OnDelete:CASCADE;"`

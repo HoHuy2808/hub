@@ -27,9 +27,9 @@ type Client struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// Thêm CheckOrigin để bỏ qua lỗi CORS khi test từ localhost:5500 sang localhost:2808
+	// Thêm CheckOrigin để bỏ qua lỗi CORS khi test
 	CheckOrigin: func(r *http.Request) bool {
-		return true 
+		return true
 	},
 }
 
@@ -101,11 +101,8 @@ func (c *Client) WritePump() {
 // ServeWs xử lý request nâng cấp lên WebSocket
 func ServeWs(hub *Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Lấy userID từ URL query parameter (ví dụ: ?userID=1)
-		// Trong thực tế, bạn sẽ lấy từ JWT token (c.MustGet("userID"))
 		userID := c.Query("userID")
 		if userID == "" {
-			// Bắt buộc phải có userID để kết nối trong mô hình mạng xã hội
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing userID in query parameter"})
 			return
 		}
