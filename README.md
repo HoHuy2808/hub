@@ -2,6 +2,10 @@
 
 Backend-Hub is a social media project I builded while learning **Golang**, **Gin**, **GORM** and **WebSockets**.
 
+## Schema
+<img width="868" height="730" alt="postgres 3 - hub - public" src="https://github.com/user-attachments/assets/8cc308fb-1d5a-4cc9-8dd8-058315ed7596" />
+
+
 ## 🚀 Tech Stack
 - **Language:** Golang
 - **Framework:** Gin Web Framework
